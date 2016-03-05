@@ -1,0 +1,74 @@
+st.tld
+-------
+<?xml version="1.0" encoding="UTF-8"?>
+<taglib version="2.0" xmlns="http://java.sun.com/xml/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd">
+  <tlib-version>2.0</tlib-version>
+  <jsp-version>2.0</jsp-version>
+  <short-name>st</short-name>
+  <uri>http://www.srikanthtechnologies.com/feb8</uri>
+  <description>
+    Tags related to database  
+  </description>
+  <tag>
+    <name>jobs</name>
+    <tag-class>tags.JobsHandler</tag-class>
+    <body-content>empty</body-content>
+  </tag> 
+</taglib>
+
+JobsHandler.java
+-----------------
+
+package tags;
+
+import java.io.IOException;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.SimpleTagSupport;
+
+import oracle.jdbc.rowset.OracleCachedRowSet;
+
+public class JobsHandler extends SimpleTagSupport {
+
+	@Override
+	public void doTag() throws JspException, IOException {
+		JspWriter out = getJspContext().getOut();
+		out.println("<h3>List Of Jobs</h3>");
+		out.println("<table border='1'><tr><th>Title</th><th>Min Salary </th></tr>");
+		try {
+			OracleCachedRowSet crs = new OracleCachedRowSet();
+			crs.setUrl("jdbc:oracle:thin:@localhost:1521:xe");
+			crs.setUsername("hr");
+			crs.setPassword("hr");
+			crs.setCommand("select * from jobs");
+			crs.execute();
+
+			while (crs.next()) {
+				out.println("<tr><td>" + crs.getString("job_title") + "</td><td>" + crs.getString("min_salary")
+						+ "</td></tr>");
+			}
+
+			out.println("</table>");
+			crs.close();
+		} catch (Exception ex) {
+			System.out.println(ex.getMessage());
+		}
+	}
+}
+
+usejobs.jsp
+-----------
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<%@ taglib uri="http://www.srikanthtechnologies.com/feb8" prefix="st" %>
+    
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+ <title>Using Jobs</title>
+</head>
+<body>
+  <st:jobs />
+</body>
+</html>
