@@ -24,6 +24,12 @@ st.tld
        <rtexprvalue>true</rtexprvalue>
     </attribute>
   </tag> 
+  <tag>
+    <name>jobs3</name>
+    <tag-class>tags.Jobs3Handler</tag-class>
+    <body-content>scriptless</body-content>
+  </tag>
+  
   
 </taglib>
 
@@ -113,6 +119,49 @@ public class Jobs2Handler extends SimpleTagSupport {
 	}
 }
 
+Jobs3Handler.java
+===================
+package tags;
+
+import java.io.IOException;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.tagext.JspFragment;
+import javax.servlet.jsp.tagext.SimpleTagSupport;
+
+import oracle.jdbc.rowset.OracleCachedRowSet;
+
+public class Jobs3Handler extends SimpleTagSupport {
+
+	@Override
+	public void doTag() throws JspException, IOException {
+		JspWriter out = getJspContext().getOut();
+		PageContext ctx = (PageContext)  getJspContext();
+		JspFragment body = getJspBody();
+		try {
+			OracleCachedRowSet crs = new OracleCachedRowSet();
+			crs.setUrl("jdbc:oracle:thin:@localhost:1521:xe");
+			crs.setUsername("hr");
+			crs.setPassword("hr");
+			crs.setCommand("select * from jobs");
+			crs.execute();
+
+			while (crs.next()) {
+        		   	ctx.setAttribute("title",  crs.getString("job_title"));
+               			ctx.setAttribute("minSalary",  crs.getString("min_salary"));
+			        body.invoke(out); // process body 
+			}
+
+			crs.close();
+		} catch (Exception ex) {
+			System.out.println(ex.getMessage());
+		}
+	}
+
+}
+
 
 
 usejobs.jsp
@@ -132,6 +181,15 @@ usejobs.jsp
   <st:jobs2 title="sales" />
   <p/>
   <st:jobs2 title="it" />
+  
+  <p/>
+  
+  <ul>
+  <st:jobs3>
+     <li>${title}</li>
+  </st:jobs3>
+  </ul>
+   
 </body>
 </html>
 
