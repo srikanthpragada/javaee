@@ -1,0 +1,44 @@
+web.xml
+=========
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" version="3.1">
+  <display-name>wsdemo</display-name>
+   <listener>
+        <listener-class>
+                com.sun.xml.ws.transport.http.servlet.WSServletContextListener
+        </listener-class>
+    </listener>
+   
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+</web-app>
+
+
+sun-jaxws.xml
+=============
+<?xml version="1.0" encoding="UTF-8"?>
+<endpoints xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime"
+	version="2.0">
+	<endpoint name="Hello"
+		implementation="wsdemo.Hello"
+		url-pattern="/hello" />
+</endpoints>
+
+
+Hello.java
+==========
+package wsdemo;
+
+import javax.jws.WebMethod;
+import javax.jws.WebService;
+
+@WebService 
+public class Hello {
+
+	@WebMethod 
+	public String hello(String name) {
+		return name + ", Hello SOAP Web Service!";
+	}
+}
+
