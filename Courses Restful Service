@@ -1,0 +1,115 @@
+web.xml
+=========
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" version="3.1">
+  <display-name>restdemo</display-name>
+   <servlet>
+    <servlet-name>Jersey REST Service</servlet-name>
+    <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+    <init-param>
+        <param-name>jersey.config.server.provider.packages</param-name>
+        <param-value>rest</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Jersey REST Service</servlet-name>
+    <url-pattern>/rest/*</url-pattern>
+  </servlet-mapping>
+  
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+</web-app>
+
+
+Course.java
+=============
+package rest;
+
+import java.util.ArrayList;
+public class Course {
+	private String name;
+	private int duration, fee;
+
+	public Course() {
+		super();
+	}
+
+	public Course(String name, int duration, int fee) {
+		super();
+		this.name = name;
+		this.duration = duration;
+		this.fee = fee;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getDuration() {
+		return duration;
+	}
+
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
+
+	public int getFee() {
+		return fee;
+	}
+
+	public void setFee(int fee) {
+		this.fee = fee;
+	}
+
+	public static ArrayList<Course> getCourses() {
+		ArrayList<Course> courses = new ArrayList<>();
+		courses.add( new Course("Java SE 8.0",40,4000));
+		courses.add( new Course("Java EE 7.0",40,4500));
+		courses.add( new Course("Android Programming",40,3500));
+		
+		return courses;
+
+	}
+
+}
+
+Courses.java
+=============
+package rest;
+
+import java.util.List;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+
+import com.google.gson.Gson;  // uses Gson (Google's Json Library)
+
+@Path("/courses")
+public class Courses {
+	
+	@GET
+	@Produces("application/json")
+	public String getAllCourses() {
+		 Gson gson = new Gson();
+		 return  gson.toJson(Course.getCourses());
+	}
+	
+	@GET
+	@Path("/{id}")
+	@Produces("application/json")
+	public String getCourses(@PathParam("id") int id) {
+		 Gson gson = new Gson();
+		 List<Course> courses  = Course.getCourses();
+		 return  gson.toJson(courses.get(id-1));
+	}
+
+}
+
