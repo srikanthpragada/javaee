@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<script src="jquery-2.2.1.js"></script>
+<title>Course Client</title>
+<script>
+   function getCourses() {
+	 $.getJSON("http://localhost:8888/rest_demo/rest/courses",{}, showCourses);   
+   }
+   
+   function showCourses(courses) {
+	   var output = "";
+	   $.each(courses,
+			   function(idx,course){
+		           output = output  + "<tr><td>" + course.name 
+		                    + "</td><td>" + course.duration 
+		                    + "</td><td>" + course.fee + "</td></tr>";  
+	           }
+	   );
+	   $("#coursesBody").html(output);
+	   $("#courseTable").css("visibility","visible");
+	   
+   }
+   
+   function getCourse() {
+		 $.getJSON("http://localhost:8888/rest_demo/rest/courses/" + $("#courseId").val(),{}, 
+				 showCourse);   
+	   }
+	   
+	   function showCourse(course) {
+		    $("#courseName").html(course.name);
+	   }
+	   
+</script>
+</head>
+<body>
+
+<button onclick="getCourses()">Get All Courses </button>
+<p/>
+<table id="courseTable" style="visibility:hidden;" border="1">
+<thead>
+  <tr  style="background-color:red;color:white;font-weight:bold">
+   <th>Name</th>
+   <th>Duration</th>
+   <th>Fee</th>
+  </tr>
+  </thead>
+  <tbody id="coursesBody">
+  
+  </tbody>
+</table>
+<p/>
+Course ID : <input type="text" id="courseId" /> 
+<button onclick="getCourse()">Get Details</button>
+<h2 id="courseName"></h2>
+</body>
+</html>
