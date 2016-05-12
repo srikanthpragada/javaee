@@ -1,0 +1,84 @@
+country.html
+-------------
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Select Country</title>
+</head>
+<body>
+	<h2>Save Country</h2>
+	<form action="savecountry.jsp">
+		Country : <input type="text" name="country" /> <input type="submit"
+			value="Submit" />
+	</form>
+
+</body>
+</html>
+
+
+savecountry.jsp
+------------------
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title></title>
+</head>
+<body>
+
+<%
+
+   String countryname =  request.getParameter("country");
+   Cookie c = new Cookie("country", countryname);
+   c.setMaxAge(60 * 60);
+   response.addCookie(c);
+   response.sendRedirect("list.jsp");
+
+%>
+</body>
+</html>
+
+list.jsp
+---------
+
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+	pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>List Of Programs</title>
+</head>
+<body>
+
+	<%
+		String country = null;
+
+		Cookie cookies[] = request.getCookies();
+
+		if (cookies != null) {
+			for (Cookie c : cookies) {
+				if (c.getName().equals("country")) {
+					country = c.getValue();
+					break;
+				}
+			}
+		}
+
+		// check whether country cookie is found
+
+		if (country == null)
+			response.sendRedirect("country.html");
+	%>
+
+	<h2>
+		Programs for
+		<%=country%>
+	</h2>
+
+</body>
+</html>
+
