@@ -28,6 +28,7 @@ public class SendMailWithAuth {
 
 		try {
 			Properties props = System.getProperties();
+			props.put("mail.smtp.auth", "true");
 			// Get a Session object
 			Session session = Session.getDefaultInstance(props, new MyAuthenticator());
 			 
