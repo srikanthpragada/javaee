@@ -1,0 +1,202 @@
+src/rest/Job.java
+-------------
+package rest;
+
+public class Job {
+	private String id, title;
+	private int minSal, maxSal;
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public int getMinSal() {
+		return minSal;
+	}
+
+	public void setMinSal(int minSal) {
+		this.minSal = minSal;
+	}
+
+	public int getMaxSal() {
+		return maxSal;
+	}
+
+	public void setMaxSal(int maxSal) {
+		this.maxSal = maxSal;
+	}
+
+}
+
+
+src/rest/JobsService.java
+---------------------
+package rest;
+
+import java.util.ArrayList;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+
+import com.google.gson.Gson;
+
+import oracle.jdbc.rowset.OracleCachedRowSet;
+
+@Path("/jobs")
+public class JobsService {
+
+	@GET
+	@Produces("application/json")
+	public String getJobs() {
+		try {
+			OracleCachedRowSet crs = new OracleCachedRowSet();
+			crs.setUrl("jdbc:oracle:thin:@localhost:1521:xe");
+			crs.setUsername("hr");
+			crs.setPassword("hr");
+			crs.setCommand("select * from jobs");
+			crs.execute();
+
+			ArrayList<Job> jobs = new ArrayList<>();
+
+			while (crs.next()) {
+
+				Job j = new Job();
+				j.setId(crs.getString("job_id"));
+				j.setTitle(crs.getString("job_title"));
+				j.setMinSal(crs.getInt("min_salary"));
+				j.setMaxSal(crs.getInt("max_salary"));
+				jobs.add(j);
+			}
+
+			crs.close();
+
+			Gson gson = new Gson();
+			return gson.toJson(jobs);
+		} catch (Exception ex) {
+			throw new NotFoundException();
+		}
+
+	}
+
+	@Path("/{id}")
+	@GET
+	public String getOneJob(@PathParam("id") String id) {
+		try {
+			OracleCachedRowSet crs = new OracleCachedRowSet();
+			crs.setUrl("jdbc:oracle:thin:@localhost:1521:xe");
+			crs.setUsername("hr");
+			crs.setPassword("hr");
+			crs.setCommand("select * from jobs where job_id = ?");
+			crs.setString(1, id);
+			crs.execute();
+			if (crs.next()) {
+				Job j = new Job();
+				j.setId(crs.getString("job_id"));
+				j.setTitle(crs.getString("job_title"));
+				j.setMinSal(crs.getInt("min_salary"));
+				j.setMaxSal(crs.getInt("max_salary"));
+				Gson gson = new Gson();
+				return gson.toJson(j);
+			} else
+				throw new NotFoundException();
+		} catch (Exception ex) {
+			throw new NotFoundException();
+		}
+
+	}
+}
+
+WebConent/jobclient.html
+-------------------------
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Job Client</title>
+<script src="jquery.js"></script>
+<script>
+  function getJob() {
+	  $.ajax(
+   	    {
+		  dataType: "json",
+		  url: "http://localhost:8888/restservices/rest/jobs/" + $("#jobid").val(),
+		  success: showResult,
+		  error : showError
+		}
+ 	  );
+  }
+  
+  function showResult(job) {
+	  $("#details").html("Title : " + job.title);
+  }
+  
+  function showError() {
+	  $("#details").html("Sorry! Id Not Found");
+  }
+</script>
+</head>
+<body>
+  Job Id : <input type="text" id="jobid" />
+  <button onclick="getJob()">Get Details</button>
+  <h2 id="details">
+  
+  </h2>
+
+</body>
+</html>
+
+WebContent/showalljobs.html
+---------------------------
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>List Of Jobs</title>
+<script src="jquery.js"></script>
+<script>
+  $( function() {
+	  $.getJSON("http://localhost:8888/restservices/rest/jobs",{}, showResult);
+    }
+  );
+  
+  function showResult(jobs) {
+	 var result = "<h2>List of Jobs</h2><ul>";
+	 
+	 $.each(jobs, 
+			 function(index, job)
+			 {
+		         result += "<li>" + job.title + "</li>";
+			 }
+	 );
+	 
+	 result += "</ul>";
+	 
+	 $("#jobs").html(result);
+			   
+  }
+
+</script>
+</head>
+<body>
+   
+   <div id="jobs">
+   
+   </div>
+
+</body>
+</html>
