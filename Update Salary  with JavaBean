@@ -1,0 +1,95 @@
+EmployeeBean.java
+=================
+package beans;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+
+public class EmployeeBean {
+	private int id, salary;
+	private String message;	
+
+	public String getMessage() {
+		return message;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public int getSalary() {
+		return salary;
+	}
+
+	public void setSalary(int salary) {
+		this.salary = salary;
+	}
+	
+	public void update() {
+		try {
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "hr", "hr");
+			PreparedStatement ps = con.prepareStatement("update employees set salary = ? where employee_id = ?");
+			ps.setInt(1, salary);
+			ps.setInt(2, id);
+			int count = ps.executeUpdate();
+			if (count == 1)
+				message = "Updated Successfully!";
+			else
+				message = "Employee id not found!";
+		} catch (Exception ex) {
+			System.out.println(ex.getMessage());
+			message = "Sorry! Error!";
+		}
+	}
+
+}
+
+
+updatesalary.jsp
+================
+<%@page
+	import="javax.sql.rowset.CachedRowSet,oracle.jdbc.rowset.OracleCachedRowSet"%>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Update Salary</title>
+</head>
+<body>
+
+	<h2>Update Salary</h2>
+
+	<form>
+		Employee Id : <br /> <input type="text" name="id" value="${param.id}"
+			required="required" />
+		<p />
+		New Salary : <br /> <input type="text" name="salary"
+			value="${param.salary}" required="required" />
+		<p />
+		<input type="submit" value="Update Salary" />
+		<p />
+	</form>
+
+	<%
+		if (request.getParameter("id") == null)
+			return;
+	%>
+
+	<jsp:useBean id="emp" class="beans.EmployeeBean" scope="page"></jsp:useBean>
+	<jsp:setProperty property="*" name="emp" />
+
+	<%
+		emp.update();
+	%>
+
+	<h4>${emp.message}</h4>
+
+</body>
+</html>
