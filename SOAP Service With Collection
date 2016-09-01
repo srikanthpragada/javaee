@@ -1,0 +1,85 @@
+
+Employee.java
+==============
+package ws;
+
+import java.io.Serializable;
+
+public class Employee implements Serializable {
+
+	private String name;
+	private double salary;
+
+	public Employee() {
+		
+	}
+	
+	public Employee(String name, double salary) {
+		this.name = name;
+		this.salary = salary;
+	}
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public double getSalary() {
+		return salary;
+	}
+
+	public void setSalary(double salary) {
+		this.salary = salary;
+	}
+
+}
+
+EmployeeService.java
+====================
+package ws;
+
+import java.util.ArrayList;
+
+import javax.jws.WebMethod;
+import javax.jws.WebService;
+
+@WebService  
+public class EmployeeService {
+	
+	@WebMethod
+	public Employee [] getEmployees() {
+		ArrayList<Employee> list = new ArrayList<>();
+		list.add(new Employee("Mr. Bean", 50000));
+		list.add(new Employee("Mr. Gates", 80000));
+		// convert to Employee[]
+		
+		Employee ea [] = new Employee[ list.size()];
+		list.toArray(ea);
+		return ea; 
+	}
+}
+
+EmployeeClient.java
+===================
+
+package ws;
+
+public class EmployeeClient {
+
+	public static void main(String[] args) throws Exception {
+		 EmployeeServiceProxy p = new EmployeeServiceProxy();
+		 
+		 for(Employee e : p.getEmployees())
+			  System.out.println(e.getName());
+
+	}
+
+}
+
+
+
+
+
+
