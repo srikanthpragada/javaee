@@ -1,0 +1,191 @@
+Job.java
+=========
+package restdemo;
+
+public class Job {
+	private String id, title;
+
+	public Job() {
+		super();
+	}
+
+	public Job(String id, String title) {
+		super();
+		this.id = id;
+		this.title = title;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+}
+
+JobsRepo.java
+=============
+package restdemo;
+
+import java.util.ArrayList;
+
+public class JobsRepo {
+
+	 private static ArrayList<Job> jobs;
+	 
+	 static 
+	 {
+		 jobs = new ArrayList<>();
+		 jobs.add( new Job("prog","Programmer"));
+		 jobs.add( new Job("test","Tester"));
+		 jobs.add( new Job("dba","Database Adminstrator"));
+	 }
+	 
+	 public static ArrayList<Job> getJobs() {
+		 return jobs;
+	 }
+	 
+	 
+	 public static Job getJob(String id) {
+		 for(Job j : jobs)
+		 {
+			 if ( j.getId().equals(id))
+				 return j;
+		 }
+		 
+		 return null; 
+	 }
+}
+
+JobService.java
+===============
+package restdemo;
+
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import com.google.gson.Gson;
+
+@Path("/jobs")
+public class JobService {
+ 
+	@GET
+	public String getJobs() {
+		Gson  gson = new Gson();
+		return  gson.toJson( JobsRepo.getJobs());
+	}
+	
+	@GET
+	@Path("/{id}")
+	public String getJob(@PathParam("id") String id) {
+		Gson  gson = new Gson();
+		Job job = JobsRepo.getJob(id);
+		if ( job == null)
+			throw new NotFoundException();
+		else
+			return  gson.toJson(job);
+	}
+	
+	
+	@DELETE
+	@Path("/{id}")
+	public void deleteJob(@PathParam("id") String id) {
+		Job job = JobsRepo.getJob(id);
+		if ( job == null)
+			throw new NotFoundException();
+		else
+			System.out.println("Deleting... " + id);
+	}
+}
+
+JobsClient.html
+===============
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Jobs Client</title>
+<script src="jquery-3.1.0.js"></script>
+<script>
+  function getJobs() {
+	  
+	  $.getJSON("http://localhost:8888/restdemo/rest/jobs",
+ 	    function(jobs) {
+  		    $.each(jobs, function(idx,job) {
+  		    	$("#jobs").append("<li>" + job.title + "</li>");
+  		    });     
+	    }
+      );
+  }
+  
+  function getJob() {
+	  var promise= $.getJSON("http://localhost:8888/restdemo/rest/jobs/" + $("#jobid").val(),null,
+			   function(job)
+			   {
+		          alert(job.id  + " - " + job.title);  
+			   }
+	  );
+	  
+	  promise.fail(
+			  function() {
+		         alert("Sorry! Job id not found"); 
+	          }
+      );
+	  
+	  
+ 	  
+  }
+  
+ function deleteJob() {
+	  
+	  $.ajax( 
+	   {
+		   url : "http://localhost:8888/restdemo/rest/jobs/" + $("#jobid").val(),
+		   method :"delete",
+		   success : showResult,
+		   error  : showError
+	    }
+      );
+  }
+ 
+  function showResult()
+  {
+	  alert("Deletion has been completed");
+  }
+  
+  function showError()
+  {
+	  alert("Job id is not found or some other error!");
+  }
+ 
+ 
+</script>
+
+</head>
+<body>
+    
+    <button onclick="getJobs()">Get All Jobs</button>
+    <p/>
+    <ul id="jobs">
+       
+    </ul>
+    
+    Job Id : <input type="text" id="jobid">
+    <button onclick="getJob()">Details</button>
+    <button onclick="deleteJob()">Delete </button>
+     
+    
+</body>
+</html>
