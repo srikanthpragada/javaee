@@ -1,0 +1,78 @@
+listmovies.jsp
+==============
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+
+<%
+   // find out any cookie with name city is present
+   
+
+   if ( request.getCookies() == null)
+	   response.sendRedirect("takecity.html");
+   
+
+   String city = null;
+   for(Cookie c : request.getCookies())
+   {
+	   if ( c.getName().equals("city"))
+	   {
+		   city = c.getValue();
+		   break;
+	   }
+		   
+   }
+   
+   if ( city == null)
+	   response.sendRedirect("takecity.html");
+%>
+
+<h1>Movies in [<%=city%>]</h1>
+
+</body>
+</html>
+
+takecity.html
+==============
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Select City</title>
+</head>
+<body>
+
+	<h2>Select City</h2>
+	<form action="savecity.jsp">
+		Number : <input type="text" name="city" />
+		<p />
+		<input type="submit" value="Submit" />
+	</form>
+
+
+</body>
+</html>
+
+savecity.jsp
+============
+
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+
+<%
+  
+   Cookie c = new Cookie("city", request.getParameter("city"));
+   c.setMaxAge(7 * 24 * 60 * 60);
+   
+   response.addCookie(c);
+   response.sendRedirect("listmovies.jsp");
+%>
+
+
+
