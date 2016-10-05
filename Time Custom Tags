@@ -1,0 +1,134 @@
+WEB-INF/st.tld
+==============
+<?xml version="1.0" encoding="UTF-8"?>
+<taglib version="2.2">
+	<tlib-version>1.0</tlib-version>
+	<short-name>st</short-name>
+	<uri>http://www.st.com/tags</uri>
+	<tag>
+		<name>time</name>
+		<tag-class>tags.TimeHandler</tag-class>
+		<body-content>empty</body-content>
+	</tag>
+
+	<tag>
+		<name>time2</name>
+		<tag-class>tags.Time2Handler</tag-class>
+		<body-content>empty</body-content>
+		<attribute>
+			<name>delim</name>
+			<type>java.lang.String</type>
+			<rtexprvalue>true</rtexprvalue>
+			<required>true</required>
+		</attribute>
+	</tag>
+
+	<tag>
+		<name>time3</name>
+		<tag-class>tags.Time3Handler</tag-class>
+		<body-content>scriptless</body-content>
+	</tag>
+</taglib>
+
+TimeHandler.java
+================
+package tags;
+
+import java.io.IOException;
+import java.time.LocalTime;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.SimpleTagSupport;
+
+public class TimeHandler extends SimpleTagSupport {
+
+	@Override
+	public void doTag() throws JspException, IOException {
+	    JspWriter writer  = this.getJspContext().getOut();
+	    LocalTime time = LocalTime.now(); 
+	    writer.println( String.format("%02d:%02d:%02d", time.getHour(), time.getMinute(), time.getSecond()));
+	}
+
+	
+}
+Time2Handler.java
+=================
+package tags;
+
+import java.io.IOException;
+import java.time.LocalTime;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.SimpleTagSupport;
+
+public class Time2Handler extends SimpleTagSupport {
+	private String delim = ":";
+	
+	// attribute  delim  
+	public void setDelim(String delim) {
+		this.delim = delim; 
+	}
+
+	@Override
+	public void doTag() throws JspException, IOException {
+	    JspWriter writer  = this.getJspContext().getOut();
+	    LocalTime time = LocalTime.now(); 
+	    writer.println( String.format("%02d%s%02d%s%02d", time.getHour(), delim, 
+	    		  time.getMinute(), delim, time.getSecond()));
+	}
+}
+
+
+Time3Handler.java
+=================
+package tags;
+
+import java.io.IOException;
+import java.time.LocalTime;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.tagext.JspFragment;
+import javax.servlet.jsp.tagext.SimpleTagSupport;
+
+public class Time3Handler extends SimpleTagSupport {
+	@Override
+	public void doTag() throws JspException, IOException {
+	    
+	    LocalTime time = LocalTime.now();
+	    
+	    PageContext ctx = (PageContext) this.getJspContext();
+	    ctx.setAttribute("hour", time.getHour());
+	    ctx.setAttribute("min", time.getMinute());
+	    ctx.setAttribute("sec", time.getSecond());
+	    
+	    JspFragment  body = getJspBody();
+	    
+	    JspWriter writer  = this.getJspContext().getOut();
+	    body.invoke(writer);  // process body and send output to client 
+	}
+}
+
+usetags.jsp
+===========
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+	pageEncoding="ISO-8859-1"%>
+<%@ taglib prefix="st" uri="http://www.st.com/tags"%>
+<html>
+<head>
+<title>Use Tags</title>
+</head>
+<body>
+	<st:time />
+  <p />
+	<st:time2 delim="-" />
+	<p/>
+	<st:time3>
+	  <h2>Hours : ${hour} </h2>
+	  <h3>Mins  : ${min}</h3>
+	</st:time3>
+</body>
+</html>
